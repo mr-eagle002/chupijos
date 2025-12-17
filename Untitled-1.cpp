@@ -4,11 +4,9 @@
 #include <fstream>
 #include <string>
 #include <sstream> 
-#include <algorithm> // for transform
+#include <algorithm>
 
 using namespace std;
-
-// --- Helper function to split a string (essential for CSV parsing) ---
 vector<string> split(const string &s, char delimiter) {
     vector<string> tokens;
     string token;
@@ -107,9 +105,8 @@ class Etablissement {
 private:
     vector<Personne*> personnes;
 
-    // Helper function to display details of a single person
     void afficherDetails( Personne* p) const {
-        p->afficher(); // Prints "Étudiant / Professeur : Name (ID)"
+        p->afficher();
 
         Etudiant* e = dynamic_cast<Etudiant*>(p);
         if (e != NULL) {
@@ -151,7 +148,7 @@ public:
         }
 
         string line;
-        getline(file, line); // Skip header line
+        getline(file, line);
 
         while (getline(file, line)) {
             vector<string> fields = split(line, ',');
@@ -159,10 +156,10 @@ public:
 
             string matricule = fields[0];
             string nom = fields[1];
-            char type = fields[2][0]; // 'P' or 'E'
+            char type = fields[2][0];
             string details = fields[3];
 
-            if (type == 'P') { // Professeur
+            if (type == 'P') {
                 Professeur* prof = new Professeur(nom, matricule);
                 vector<string> matieres = split(details, ';');
                 for (const string& m : matieres) {
@@ -170,7 +167,7 @@ public:
                 }
                 ajouterPersonne(prof);
             }
-            else if (type == 'E') { // Etudiant
+            else if (type == 'E') {
                 Etudiant* etu = new Etudiant(nom, matricule);
                 vector<string> sujets_notes = split(details, ';');
 
@@ -217,7 +214,6 @@ public:
 
         if (input.empty()) return;
 
-        // Convert input to uppercase for case-insensitive matching
         transform(input.begin(), input.end(), input.begin(), ::toupper);
         char choice = input[0];
 
@@ -251,10 +247,8 @@ public:
 int main() {
     Etablissement e;
     
-    // 1. Load data from the CSV file
     e.chargerDonnees("school_data.csv"); 
 
-    // 2. Loop until the user decides to quit
     string choice;
     do {
         e.afficherSelection();
@@ -267,4 +261,5 @@ int main() {
 
     cout << "\nProgramme terminé. Au revoir.\n";
     return 0;
+
 }
