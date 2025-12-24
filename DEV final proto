@@ -1,0 +1,324 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
+
+using namespace std;
+
+/* ===================== PERSONNE ===================== */
+class Personne {
+protected:
+    string nom;
+    string matricule;
+    string role; // ST, TE, AD
+
+public:
+    Personne(string n, string m, string r)
+        : nom(n), matricule(m), role(r) {}
+
+    virtual ~Personne() {}
+
+    string getNom() const { return nom; }
+    string getMatricule() const { return matricule; }
+    string getRole() const { return role; }
+
+    virtual void afficher() const = 0;
+    virtual void afficherAdmin() const = 0;
+};
+
+/* ===================== ETUDIANT ===================== */
+class Etudiant : public Personne {
+private:
+    map<string, vector<float> > notes;
+
+public:
+    Etudiant(string n, string m)
+        : Personne(n, m, "ST") {}
+
+    void ajouterNote(string mat, float note) {
+        notes[mat].push_back(note);
+    }
+
+    void modifierDerniereNote(string mat, float note) {
+        if (!notes[mat].empty())
+            notes[mat].back() = note;
+        else
+            notes[mat].push_back(note);
+    }
+
+    map<string, vector<float> > getNotes() const {
+        return notes;
+    }
+
+    float moyenneGlobale() const {
+        float s = 0;
+        int c = 0;
+        for (map<string, vector<float> >::const_iterator it = notes.begin();
+             it != notes.end(); ++it) {
+            for (size_t i = 0; i < it->second.size(); i++) {
+                s += it->second[i];
+                c++;
+            }
+        }
+        return c ? s / c : 0;
+    }
+
+    void afficher() const {
+        cout << "\n===== STUDENT HOME =====\n";
+        cout << "Name      : " << nom << endl;
+        cout << "Matricule : " << matricule << endl;
+        for (map<string, vector<float> >::const_iterator it = notes.begin();
+             it != notes.end(); ++it) {
+            cout << "  " << it->first << " : ";
+            for (size_t i = 0; i < it->second.size(); i++)
+                cout << it->second[i] << " ";
+            cout << endl;
+        }
+        cout << "Global average: " << moyenneGlobale() << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " | " << matricule << " | Student\n";
+    }
+};
+
+/* ===================== PROFESSEUR ===================== */
+class Professeur : public Personne {
+private:
+    vector<string> matieres;
+
+public:
+    Professeur(string n, string m)
+        : Personne(n, m, "TE") {}
+
+    void ajouterMatiere(string mat) {
+        matieres.push_back(mat);
+    }
+
+    bool enseigne(string mat) const {
+        for (size_t i = 0; i < matieres.size(); i++)
+            if (matieres[i] == mat) return true;
+        return false;
+    }
+
+    void afficher() const {
+        cout << "\n===== PROFESSOR HOME =====\n";
+        cout << "Name      : " << nom << endl;
+        cout << "Matricule : " << matricule << endl;
+        cout << "Subjects  : ";
+        for (size_t i = 0; i < matieres.size(); i++)
+            cout << matieres[i] << " ";
+        cout << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " | " << matricule << " | Teacher | ";
+        for (size_t i = 0; i < matieres.size(); i++)
+            cout << matieres[i] << " ";
+        cout << endl;
+    }
+};
+
+/* ===================== ADMIN ===================== */
+class Admin : public Personne {
+public:
+    Admin(string n, string m)
+        : Personne(n, m, "AD") {}
+
+    void afficher() const {
+        cout << "\n===== ADMIN HOME =====\n";
+        cout << "Administrator: " << nom << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " | " << matricule << " | Admin\n";
+    }
+};
+
+/* ===================== ETABLISSEMENT ===================== */
+class Etablissement {
+private:
+    vector<Personne*> users;
+
+public:
+    ~Etablissement() {
+        for (size_t i = 0; i < users.size(); i++)
+            delete users[i];
+    }
+
+    void ajouterUser(Personne* p) {
+        users.push_back(p);
+    }
+
+    Personne* chercherParMatricule(string m) {
+        for (size_t i = 0; i < users.size(); i++)
+            if (users[i]->getMatricule() == m)
+                return users[i];
+        return NULL;
+    }
+
+    void supprimerUser(string m) {
+        for (size_t i = 0; i < users.size(); i++) {
+            if (users[i]->getMatricule() == m) {
+                delete users[i];
+                users.erase(users.begin() + i);
+                cout << "✔ User deleted.\n";
+                return;
+            }
+        }
+        cout << "❌ User not found.\n";
+    }
+
+    vector<Etudiant*> getEtudiants() const {
+        vector<Etudiant*> res;
+        for (size_t i = 0; i < users.size(); i++) {
+            Etudiant* e = dynamic_cast<Etudiant*>(users[i]);
+            if (e) res.push_back(e);
+        }
+        return res;
+    }
+
+    void afficherPourAdmin() const {
+        cout << "\n--- ALL USERS ---\n";
+        for (size_t i = 0; i < users.size(); i++)
+            users[i]->afficherAdmin();
+    }
+};
+
+/* ===================== MAIN ===================== */
+int main() {
+    Etablissement e;
+
+    // HARD-CODED DATABASE
+    Etudiant* st1 = new Etudiant("Alice", "ST1001");
+    st1->ajouterNote("Math", 15);
+    st1->ajouterNote("Physics", 14);
+
+    Etudiant* st2 = new Etudiant("Bob", "ST1002");
+    st2->ajouterNote("Math", 10);
+    st2->ajouterNote("Physics", 12);
+
+    Professeur* pr1 = new Professeur("Dr Smith", "TE2001");
+    pr1->ajouterMatiere("Math");
+
+    Admin* ad1 = new Admin("SystemAdmin", "AD0001");
+
+    e.ajouterUser(st1);
+    e.ajouterUser(st2);
+    e.ajouterUser(pr1);
+    e.ajouterUser(ad1);
+
+    while (true) {
+        string m;
+        cout << "\nLOGIN (matricule) or Q to quit: ";
+        cin >> m;
+        if (m == "Q") break;
+
+        Personne* u = e.chercherParMatricule(m);
+        if (!u) {
+            cout << "❌ User not found.\n";
+            continue;
+        }
+
+        if (u->getRole() == "ST") {
+            u->afficher();
+        }
+
+        else if (u->getRole() == "TE") {
+            Professeur* p = dynamic_cast<Professeur*>(u);
+            p->afficher();
+
+            cout << "\n--- STUDENTS ---\n";
+            vector<Etudiant*> etudiants = e.getEtudiants();
+
+            // <<< NEW: DISPLAY STUDENT GRADES >>>
+            for (size_t i = 0; i < etudiants.size(); i++) {
+                cout << etudiants[i]->getNom()
+                     << " | " << etudiants[i]->getMatricule() << " | ";
+
+                map<string, vector<float> > notes = etudiants[i]->getNotes();
+                for (map<string, vector<float> >::iterator it = notes.begin();
+                     it != notes.end(); ++it) {
+                    cout << it->first << ": ";
+                    for (size_t j = 0; j < it->second.size(); j++)
+                        cout << it->second[j] << " ";
+                    cout << "| ";
+                }
+                cout << endl;
+            }
+
+            while (true) {
+                cout << "\nA: Modify grade | Q: Logout\nChoice: ";
+                string c;
+                cin >> c;
+                if (c == "Q") break;
+
+                if (c == "A") {
+                    string sm, mat;
+                    float note;
+
+                    cout << "Student matricule: ";
+                    cin >> sm;
+                    cout << "Subject: ";
+                    cin >> mat;
+
+                    if (!p->enseigne(mat)) {
+                        cout << "❌ Access denied.\n";
+                        continue;
+                    }
+
+                    cout << "Grade: ";
+                    cin >> note;
+
+                    Etudiant* et =
+                        dynamic_cast<Etudiant*>(e.chercherParMatricule(sm));
+                    if (et) {
+                        et->modifierDerniereNote(mat, note);
+                        cout << "✔ Grade updated.\n";
+                    }
+                }
+            }
+        }
+
+        else if (u->getRole() == "AD") {
+            u->afficher();
+            e.afficherPourAdmin();
+
+            while (true) {
+                cout << "\nA: Add user | D: Delete user | Q: Logout\nChoice: ";
+                string c;
+                cin >> c;
+                if (c == "Q") break;
+
+                if (c == "A") {
+                    string n, m2, r;
+                    cout << "Name: "; cin >> n;
+                    cout << "Matricule: "; cin >> m2;
+                    cout << "Role (ST/TE): "; cin >> r;
+
+                    if (r == "ST") {
+                        e.ajouterUser(new Etudiant(n, m2));
+                    } else if (r == "TE") {
+                        Professeur* p = new Professeur(n, m2);
+                        string mat;
+                        cout << "Subject: "; cin >> mat;
+                        p->ajouterMatiere(mat);
+                        e.ajouterUser(p);
+                    }
+                }
+
+                if (c == "D") {
+                    string dm;
+                    cout << "Matricule to delete: ";
+                    cin >> dm;
+                    e.supprimerUser(dm);
+                }
+
+                e.afficherPourAdmin();
+            }
+        }
+    }
+
+    cout << "\nProgram ended.\n";
+    return 0;
+}
