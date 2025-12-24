@@ -1,0 +1,155 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
+
+using namespace std;
+
+/* ===================== PERSONNE ===================== */
+class Personne {
+protected:
+    string nom;
+    string matricule;
+
+public:
+    Personne(string n, string m) : nom(n), matricule(m) {}
+    virtual ~Personne() {}
+
+    string getNom() const { return nom; }
+    string getMatricule() const { return matricule; }
+
+    virtual void afficher() const = 0;
+
+    bool operator==(const Personne& p) const {
+        return matricule == p.matricule;
+    }
+
+    friend ostream& operator<<(ostream& os, const Personne& p) {
+        os << p.nom << " (" << p.matricule << ")";
+        return os;
+    }
+};
+
+/* ===================== ETUDIANT ===================== */
+class Etudiant : public Personne {
+private:
+    map<string, vector<float> > notes;
+
+public:
+    Etudiant(string n, string m) : Personne(n, m) {}
+
+    void ajouterNote(string matiere, float note) {
+        if (note >= 0 && note <= 20)
+            notes[matiere].push_back(note);
+    }
+
+    float moyenneMatiere(string matiere) const {
+        map<string, vector<float> >::const_iterator it = notes.find(matiere);
+        if (it == notes.end()) return 0;
+
+        float s = 0;
+        for (size_t i = 0; i < it->second.size(); i++)
+            s += it->second[i];
+
+        return it->second.size() ? s / it->second.size() : 0;
+    }
+
+    float moyenneGlobale() const {
+        float s = 0;
+        int c = 0;
+
+        for (map<string, vector<float> >::const_iterator it = notes.begin();
+             it != notes.end(); ++it) {
+            for (size_t i = 0; i < it->second.size(); i++) {
+                s += it->second[i];
+                c++;
+            }
+        }
+        return c ? s / c : 0;
+    }
+
+    void afficher() const {
+        cout << "Etudiant: " << *this << endl;
+        for (map<string, vector<float> >::const_iterator it = notes.begin();
+             it != notes.end(); ++it) {
+            cout << "  " << it->first << " : ";
+            for (size_t i = 0; i < it->second.size(); i++)
+                cout << it->second[i] << " ";
+            cout << "(moy=" << moyenneMatiere(it->first) << ")" << endl;
+        }
+        cout << "Moyenne globale: " << moyenneGlobale() << endl;
+    }
+};
+
+/* ===================== PROFESSEUR ===================== */
+class Professeur : public Personne {
+private:
+    vector<string> matieres;
+
+public:
+    Professeur(string n, string m) : Personne(n, m) {}
+
+    void ajouterMatiere(string m) {
+        matieres.push_back(m);
+    }
+
+    void afficher() const {
+        cout << "Professeur: " << *this << endl;
+        cout << "Matieres: ";
+        for (size_t i = 0; i < matieres.size(); i++)
+            cout << matieres[i] << " ";
+        cout << endl;
+    }
+};
+
+/* ===================== ETABLISSEMENT ===================== */
+class Etablissement {
+private:
+    vector<Personne*> personnes;
+
+public:
+    ~Etablissement() {
+        for (size_t i = 0; i < personnes.size(); i++)
+            delete personnes[i];
+    }
+
+    void ajouterPersonne(Personne* p) {
+        personnes.push_back(p);
+    }
+
+    void afficherTout() const {
+        for (size_t i = 0; i < personnes.size(); i++) {
+            personnes[i]->afficher();
+            cout << "------------------------\n";
+        }
+    }
+};
+
+/* ===================== MAIN (PROTO) ===================== */
+int main() {
+    Etablissement e;
+
+    // DATABASE SIMULATION (HARD-CODED)
+    Etudiant* et1 = new Etudiant("Alice", "ST1001");
+    et1->ajouterNote("Math", 15);
+    et1->ajouterNote("Math", 18);
+    et1->ajouterNote("Physics", 14);
+
+    Etudiant* et2 = new Etudiant("Bob", "ST1002");
+    et2->ajouterNote("Math", 10);
+    et2->ajouterNote("Physics", 12);
+
+    Professeur* pr1 = new Professeur("Dr Smith", "TE2001");
+    pr1->ajouterMatiere("Math");
+    pr1->ajouterMatiere("Physics");
+
+    e.ajouterPersonne(et1);
+    e.ajouterPersonne(et2);
+    e.ajouterPersonne(pr1);
+
+    cout << "=== PROTOTYPE : SCHOOL MANAGEMENT SYSTEM ===\n\n";
+    e.afficherTout();
+
+    cout << "\nPrototype executed successfully.\n";
+    return 0;
+}
