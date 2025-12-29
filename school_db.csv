@@ -1,0 +1,83 @@
+Matricule,Nom,Type,Details,Class_Number,Random Grade
+TE835,Prof. Hassan El Amrani,P,Mathématiques;Physique,S5;S4,
+TE647,Prof. Zineb Bennani,P,Informatique,S2;S6,
+TE779,Prof. Rachid Alami,P,Arabe,S3;S2,
+TE483,Prof. Fatima Zahra Idrissi,P,Français,S5;S4,
+TE230,Prof. Karim Tazi,P,Histoire-Géo,S4;S5,
+TE880,Prof. Samira Berrada,P,Anglais,S6;S4,
+TE156,Prof. Omar Chraibi,P,Philosophie,S5;S3,
+TE543,Prof. Latifa Mansouri,P,SVT,S1;S3,
+TE982,Prof. Youssef Daoudi,P,Sport,S5;S5,
+TE395,Prof. Amina Fassi,P,Économie,S5;S6,
+ST082,Mohamed Alaoui,E,Mathématiques;Physique;15;16,S2,17
+ST534,Salma Benjelloun,E,Informatique;5;6,S1,6
+ST522,Yassine Jettou,E,Arabe;19;5,S3,12
+ST823,Hajar Boukhris,E,Français;4;4,S4,7
+ST242,Mehdi El Fassi,E,Histoire-Géo;19;9,S2,10
+ST584,Imane Naciri,E,Anglais;13;9,S2,10
+ST588,Hamza Belkadi,E,Philosophie;1;15,S4,12
+ST668,Aya Ouazzani,E,SVT;4;5,S4,2
+ST755,Anas Ech-Chouani,E,Sport;18;20,S1,10
+ST272,Meryem Hassar,E,Économie;5;20,S4,19
+ST721,Othmane Lazrak,E,Mathématiques;Physique;12;10,S2,16
+ST638,Khadija Sefrioui,E,Informatique;15;11,S4,6
+ST487,Zakaria Bouziane,E,Arabe;16;18,S2,10
+ST254,Sara El Kabbaj,E,Français;4;16,S3,6
+ST139,Bilal Aouad,E,Histoire-Géo;6;16,S2,13
+ST777,Rania Benslimane,E,Anglais;7;10,S5,18
+ST056,Amine Tazi,E,Philosophie;18;2,S1,10
+ST617,Noura Belhaj,E,SVT;2;11,S1,20
+ST359,Ayoub El Idrissi,E,Sport;8;5,S3,9
+ST660,Ghita Benkirane,E,Économie;13;9,S1,18
+ST941,Reda El Mansouri,E,Mathématiques;Physique;1;5,S1,20
+ST426,Sofia Akesbi,E,Informatique;11;14,S2,11
+ST907,Walid Chraibi,E,Arabe;5;7,S2,19
+ST825,Hiba Bennani,E,Français;11;3,S2,4
+ST210,Ismail Zenati,E,Histoire-Géo;5;4,S2,1
+ST521,Leila Ammor,E,Anglais;7;9,S3,16
+ST952,Saad Benchekroun,E,Philosophie;8;16,S5,10
+ST407,Kenza Filali,E,SVT;19;3,S2,10
+ST794,Ali Kabbaj,E,Sport;16;6,S3,4
+ST693,Houda Mekouar,E,Économie;17;13,S5,19
+ST369,Marouane Tahiri,E,Mathématiques;Physique;17;20,S2,16
+ST607,Nisrine El Haddaoui,E,Informatique;2;20,S2,3
+ST164,Soufiane Rhissassi,E,Arabe;12;19,S4,17
+ST059,Kaoutar Bekkali,E,Français;11;17,S3,1
+ST315,Nabil Squalli,E,Histoire-Géo;14;20,S3,2
+ST998,Lamia Benomar,E,Anglais;17;9,S2,13
+ST750,Driss Jaidi,E,Philosophie;7;16,S2,8
+ST887,Asmae Kadiri,E,SVT;4;3,S1,20
+ST456,Mourad Lahlou,E,Sport;14;4,S1,2
+ST125,Sanaa Guessous,E,Économie;8;12,S5,2
+ST037,Taha El Ouali,E,Mathématiques;Physique;18;20,S5,19
+ST686,Douae Sabri,E,Informatique;13;11,S5,20
+ST709,Younes Mernissi,E,Arabe;9;18,S1,19
+ST618,Ikram Touhami,E,Français;5;20,S1,7
+ST285,Faysal Jazouli,E,Histoire-Géo;16;5,S1,1
+ST936,Chaimae Zouhair,E,Anglais;3;12,S4,16
+ST931,Adnane Raiss,E,Philosophie;1;18,S5,13
+ST544,Fatine El Aoufir,E,SVT;10;3,S2,2
+ST604,Simo Benmoussa,E,Sport;1;10,S5,7
+ST517,Rim Fassi-Fihri,E,Économie;4;14,S2,13
+ST115,Mouad El Ghorfi,E,Mathématiques;Physique;16;18,S1,17
+ST287,Zahra Bouayad,E,Informatique;20;20,S1,8
+ST972,Yahya Cherkaoui,E,Arabe;15;12,S2,1
+ST084,Dina El Amraoui,E,Français;2;20,S5,16
+ST408,Ilias Berrada,E,Histoire-Géo;2;5,S3,14
+ST538,Nada Zerrad,E,Anglais;13;5,S2,6
+ST983,Hicham Bargach,E,Philosophie;3;17,S4,2
+ST895,Malak Iraqui,E,SVT;2;3,S5,9
+ST981,Sami Zniber,E,Sport;14;14,S5,11
+ST313,Oumaima El Asri,E,Économie;2;15,S2,10
+ST587,Ahmed Mrabet,E,Mathématiques;Physique;13;13,S2,7
+ST845,Safae Bennouna,E,Informatique;16;11,S4,10
+ST906,Tarik El Harti,E,Arabe;18;6,S2,1
+ST333,Yasmine Temsamani,E,Français;10;13,S4,19
+ST231,Khalid Senhaji,E,Histoire-Géo;16;14,S2,3
+ST605,Wissal El Mokri,E,Anglais;3;18,S4,19
+ST626,Hassan Laghzaoui,E,Philosophie;15;8,S5,11
+ST382,Manal El Younsi,E,SVT;12;16,S4,4
+ST411,Badr Eddine,E,Sport;11;17,S1,3
+ST963,Fadwa Laraki,E,Économie;15;7,S4,19
+AD478,Admin 1,A,Admin,,
+AD695,Admin 2,A,Admin,,
