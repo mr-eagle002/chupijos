@@ -1,0 +1,483 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+
+using namespace std;
+
+/* ===================== HELPERS ===================== */
+
+// Simple number check (kept this as it doesn't manipulate strings)
+bool isNumber(const string& s) {
+    if (s.empty()) return false;
+    char* end = 0;
+    strtod(s.c_str(), &end);
+    return end != s.c_str() && *end == '\0';
+}
+
+/* ===================== CLASSES ===================== */
+
+class Personne {
+protected:
+    string nom;
+    string prenom;
+    string matricule;
+    string role; 
+
+public:
+    Personne(string n, string p, string m, string r)
+        : nom(n), prenom(p), matricule(m), role(r) {}
+
+    virtual ~Personne() {}
+
+    string getNom() const { return nom; }
+    string getPrenom() const { return prenom; }
+    string getMatricule() const { return matricule; }
+    string getRole() const { return role; }
+
+    virtual void afficher() const = 0;
+    virtual void afficherAdmin() const = 0;
+};
+
+class Etudiant : public Personne {
+private:
+    string classroom;
+    int absences;
+    map<string, vector<float> > notes;
+
+public:
+    Etudiant(string n, string p, string m, string c, int a)
+        : Personne(n, p, m, "ST"), classroom(c), absences(a) {}
+
+    void ajouterNote(string mat, float note) {
+        notes[mat].push_back(note);
+    }
+
+    void modifierDerniereNote(string mat, float note) {
+        if (!notes[mat].empty())
+            notes[mat].back() = note;
+        else
+            notes[mat].push_back(note);
+    }
+
+    void addAbsence(int h) {
+        absences += h;
+    }
+
+    map<string, vector<float> > getNotes() const {
+        return notes;
+    }
+
+    string getClassroom() const { return classroom; }
+    int getAbsences() const { return absences; }
+
+    float moyenneGlobale() const {
+        float s = 0;
+        int c = 0;
+        for (map<string, vector<float> >::const_iterator it = notes.begin();
+             it != notes.end(); ++it) {
+            for (size_t i = 0; i < it->second.size(); i++) {
+                s += it->second[i];
+                c++;
+            }
+        }
+        return c ? s / c : 0;
+    }
+
+    void afficher() const {
+        cout << "+--------- STUDENT HOME ----------+" << endl;
+        cout << "| Nom: " << nom << endl;
+        cout << "| Prenom: " << prenom << endl;
+        cout << "| Matricule: " << matricule << endl;
+        cout << "| Classroom number: " << classroom << endl;
+        map<string, vector<float> > ns = getNotes();
+        if (ns.count("Math")) cout << "| Math : " << ns["Math"].back() << endl;
+        if (ns.count("Science")) cout << "| Science : " << ns["Science"].back() << endl;
+        if (ns.count("History")) cout << "| History : " << ns["History"].back() << endl;
+        cout << "| Moyenne generale: " << moyenneGlobale() << endl;
+        cout << "| Nombre d'absences: " << absences << endl;
+        cout << "+--------------------------------+" << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " " << prenom << " | " << matricule << " | Student | Classroom: " << classroom << " | Absences: " << absences << endl;
+    }
+};
+
+class Professeur : public Personne {
+private:
+    vector<string> matieres;
+
+public:
+    Professeur(string n, string p, string m)
+        : Personne(n, p, m, "TE") {}
+
+    void ajouterMatiere(string mat) {
+        matieres.push_back(mat);
+    }
+
+    bool enseigne(string mat) const {
+        for (size_t i = 0; i < matieres.size(); i++)
+            if (matieres[i] == mat) return true;
+        return false;
+    }
+
+    void afficher() const {
+        cout << "+--------- TEACHER HOME ----------+" << endl;
+        cout << "| Nom: " << nom << endl;
+        cout << "| Prenom: " << prenom << endl;
+        cout << "| Matricule: " << matricule << endl;
+        cout << "| Subject: " << (matieres.empty() ? "" : matieres[0]) << endl;
+        cout << "+--------------------------------+" << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " " << prenom << " | " << matricule << " | Teacher | Subject: " << (matieres.empty() ? "" : matieres[0]) << endl;
+    }
+};
+
+class Admin : public Personne {
+public:
+    Admin(string n, string p, string m)
+        : Personne(n, p, m, "AD") {}
+
+    void afficher() const {
+        cout << "+--------- ADMIN HOME -----------+" << endl;
+        cout << "| Nom: " << nom << endl;
+        cout << "| Prenom: " << prenom << endl;
+        cout << "| Matricule: " << matricule << endl;
+        cout << "+--------------------------------+" << endl;
+    }
+
+    void afficherAdmin() const {
+        cout << nom << " " << prenom << " | " << matricule << " | Admin" << endl;
+    }
+};
+
+class Etablissement {
+private:
+    vector<Personne*> users;
+
+public:
+    ~Etablissement() {
+        for (size_t i = 0; i < users.size(); i++)
+            delete users[i];
+    }
+
+    void ajouterUser(Personne* p) {
+        users.push_back(p);
+    }
+
+    Personne* chercherParMatricule(string m) {
+        // Debug print to see what we are comparing
+        // cout << "[DEBUG] Searching for: '" << m << "'" << endl;
+        for (size_t i = 0; i < users.size(); i++) {
+            if (users[i]->getMatricule() == m)
+                return users[i];
+        }
+        return NULL;
+    }
+
+    void supprimerUser(string m) {
+        for (size_t i = 0; i < users.size(); i++) {
+            if (users[i]->getMatricule() == m) {
+                delete users[i];
+                users.erase(users.begin() + i);
+                cout << "User deleted.\n";
+                return;
+            }
+        }
+        cout << "User not found.\n";
+    }
+
+    vector<Etudiant*> getEtudiants() const {
+        vector<Etudiant*> res;
+        for (size_t i = 0; i < users.size(); i++) {
+            Etudiant* e = dynamic_cast<Etudiant*>(users[i]);
+            if (e) res.push_back(e);
+        }
+        return res;
+    }
+
+    vector<Professeur*> getProfesseurs() const {
+        vector<Professeur*> res;
+        for (size_t i = 0; i < users.size(); i++) {
+            Professeur* p = dynamic_cast<Professeur*>(users[i]);
+            if (p) res.push_back(p);
+        }
+        return res;
+    }
+
+    void afficherPourAdmin() const {
+        cout << "\n--- ALL USERS ---\n";
+        for (size_t i = 0; i < users.size(); i++)
+            users[i]->afficherAdmin();
+    }
+};
+
+/* ===================== DATABASE LOADING ===================== */
+
+void loadDatabase(Etablissement& e, const string& filename) {
+    ifstream file(filename.c_str());
+    
+    // DEBUG CHECK 1: FILE OPENING
+    if (!file.is_open()) {
+        cerr << "\n[!] ERROR: Could not open file '" << filename << "'" << endl;
+        cerr << "[!] Make sure 'school_db.csv' is in the same folder as the .exe file." << endl;
+        return;
+    }
+
+    cout << "Loading database... " << endl;
+    
+    string line;
+    // Skip Header
+    if(!getline(file, line)) return; 
+
+    int count = 0;
+
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+
+        stringstream ss(line);
+        string segment;
+        vector<string> row;
+
+        // Split by comma
+        while(getline(ss, segment, ',')) {
+            // Optional: Manually remove \r if on Windows but reading in Linux style
+            if (!segment.empty() && segment[segment.size()-1] == '\r') 
+                segment.erase(segment.size()-1);
+            row.push_back(segment);
+        }
+
+        if (row.size() < 4) continue;
+
+        string matricule = row[0];
+        string nom = row[1];
+        string prenom = row[2];
+        string classroom = row[3];
+
+        if (classroom.empty()) {
+            if (row.size() > 4 && row[4] == "Admin") {
+                e.ajouterUser(new Admin(nom, prenom, matricule));
+                count++;
+            } else {
+                Professeur* p = new Professeur(nom, prenom, matricule);
+                if (row.size() > 4 && !row[4].empty()) p->ajouterMatiere(row[4]);
+                e.ajouterUser(p);
+                count++;
+            }
+        } else {
+            // Student
+            string s1 = (row.size() > 4) ? row[4] : "";
+            string g1s = (row.size() > 5) ? row[5] : "";
+            string s2 = (row.size() > 6) ? row[6] : "";
+            string g2s = (row.size() > 7) ? row[7] : "";
+            string s3 = (row.size() > 8) ? row[8] : "";
+            string g3s = (row.size() > 9) ? row[9] : "";
+            string abs = (row.size() > 11) ? row[11] : "0";
+
+            float g1 = g1s.empty() ? 0 : atof(g1s.c_str());
+            float g2 = g2s.empty() ? 0 : atof(g2s.c_str());
+            float g3 = g3s.empty() ? 0 : atof(g3s.c_str());
+            int ab = abs.empty() ? 0 : atoi(abs.c_str());
+
+            Etudiant* st = new Etudiant(nom, prenom, matricule, classroom, ab);
+            if (!s1.empty()) st->ajouterNote(s1, g1);
+            if (!s2.empty()) st->ajouterNote(s2, g2);
+            if (!s3.empty()) st->ajouterNote(s3, g3);
+            e.ajouterUser(st);
+            count++;
+        }
+    }
+    file.close();
+    cout << "Finished loading " << count << " users.\n" << endl;
+}
+
+/* ===================== MAIN ===================== */
+int main() {
+    Etablissement e;
+
+    loadDatabase(e, "school_db.csv");
+
+    while (true) {
+        string m;
+        cout << "\nLOGIN (matricule) or Q to quit: ";
+        cin >> m;
+        if (m == "Q") break;
+
+        Personne* u = e.chercherParMatricule(m);
+        if (!u) {
+            cout << "? User not found.\n";
+            continue;
+        }
+
+        if (u->getRole() == "ST") {
+            Etudiant* st = dynamic_cast<Etudiant*>(u);
+            st->afficher();
+            while (true) {
+                cout << "Q: Logout | T: Transcript" << endl;
+                string c; cin >> c;
+                if (c == "Q") break;
+                if (c == "T") {
+                    ofstream file(("transcript_" + st->getMatricule() + ".txt").c_str());
+                    file << "Nom: " << st->getNom() << endl;
+                    file << "Prenom: " << st->getPrenom() << endl;
+                    file << "Matricule: " << st->getMatricule() << endl;
+                    file << "Classroom: " << st->getClassroom() << endl;
+                    map<string, vector<float> > ns = st->getNotes();
+                    for (map<string, vector<float> >::iterator it = ns.begin(); it != ns.end(); ++it) {
+                        file << it->first << ": ";
+                        for (size_t j = 0; j < it->second.size(); ++j) {
+                            file << it->second[j] << " ";
+                        }
+                        file << endl;
+                    }
+                    file << "Moyenne: " << st->moyenneGlobale() << endl;
+                    file << "Absences: " << st->getAbsences() << endl;
+                    file.close();
+                    cout << "Transcript downloaded." << endl;
+                }
+            }
+        }
+        else if (u->getRole() == "TE") {
+            Professeur* p = dynamic_cast<Professeur*>(u);
+            p->afficher();
+            while (true) {
+                cout << "S: Show students | Q: Logout" << endl;
+                string c; cin >> c;
+                if (c == "Q") break;
+                if (c == "S") {
+                    cout << "\n--- MY STUDENTS ---\n";
+                    vector<Etudiant*> etudiants = e.getEtudiants();
+                    bool foundAny = false;
+                    for (size_t i = 0; i < etudiants.size(); i++) {
+                        map<string, vector<float> > notes = etudiants[i]->getNotes();
+                        bool hasSubject = false;
+                        for (map<string, vector<float> >::iterator it = notes.begin();
+                             it != notes.end(); ++it) {
+                            if (p->enseigne(it->first)) {
+                                hasSubject = true;
+                                break;
+                            }
+                        }
+                        if (hasSubject) {
+                            foundAny = true;
+                            cout << etudiants[i]->getNom() << " " << etudiants[i]->getPrenom() << " | " << etudiants[i]->getMatricule() << " | Absences: " << etudiants[i]->getAbsences() << " | ";
+                            for (map<string, vector<float> >::iterator it = notes.begin();
+                                 it != notes.end(); ++it) {
+                                if (p->enseigne(it->first)) {
+                                    cout << it->first << ": ";
+                                    for (size_t j = 0; j < it->second.size(); j++)
+                                        cout << it->second[j] << " ";
+                                    cout << "| ";
+                                }
+                            }
+                            cout << endl;
+                        }
+                    }
+                    if (!foundAny) cout << "(No students found for your subjects)\n";
+                    while (true) {
+                        cout << "A: Add/Modify grade | B: Add absence | Q: Back" << endl;
+                        string sub; cin >> sub;
+                        if (sub == "Q") break;
+                        if (sub == "A") {
+                            string sm, mat; float note;
+                            cout << "Student matricule: "; cin >> sm;
+                            cout << "Subject: "; cin >> mat;
+                            if (!p->enseigne(mat)) {
+                                cout << "? Access denied.\n"; continue;
+                            }
+                            Etudiant* et = dynamic_cast<Etudiant*>(e.chercherParMatricule(sm));
+                            bool takes = false;
+                            if(et) {
+                                map<string, vector<float> > n = et->getNotes();
+                                if(n.find(mat)!=n.end()) takes=true;
+                            }
+                            if (et && takes) {
+                                cout << "Grade: "; cin >> note;
+                                et->modifierDerniereNote(mat, note);
+                                cout << "? Grade updated.\n";
+                            } else cout << "? Error.\n";
+                        }
+                        if (sub == "B") {
+                            string sm; int h;
+                            cout << "Student matricule: "; cin >> sm;
+                            Etudiant* et = dynamic_cast<Etudiant*>(e.chercherParMatricule(sm));
+                            if (et) {
+                                cout << "Hours to add: "; cin >> h;
+                                et->addAbsence(h);
+                                cout << "Absence added.\n";
+                            } else cout << "Student not found.\n";
+                        }
+                    }
+                }
+            }
+        }
+        else if (u->getRole() == "AD") {
+            u->afficher();
+            while (true) {
+                cout << "1: Show students | 2: Show teachers | Q: Logout" << endl;
+                string c; cin >> c;
+                if (c == "Q") break;
+                if (c == "1") {
+                    cout << "\n--- STUDENTS ---\n";
+                    vector<Etudiant*> studs = e.getEtudiants();
+                    for (size_t i = 0; i < studs.size(); i++) studs[i]->afficherAdmin();
+                    cout << "A: Add student | D: Delete student" << endl;
+                    string sub; cin >> sub;
+                    if (sub == "A") {
+                        string n, p, m, cl, s1, s2, s3; float g1, g2, g3; int a;
+                        cout << "Nom: "; cin >> n;
+                        cout << "Prenom: "; cin >> p;
+                        cout << "Matricule: "; cin >> m;
+                        cout << "Classroom: "; cin >> cl;
+                        cout << "Subject1: "; cin >> s1;
+                        cout << "Grade1: "; cin >> g1;
+                        cout << "Subject2: "; cin >> s2;
+                        cout << "Grade2: "; cin >> g2;
+                        cout << "Subject3: "; cin >> s3;
+                        cout << "Grade3: "; cin >> g3;
+                        cout << "Absences: "; cin >> a;
+                        Etudiant* st = new Etudiant(n, p, m, cl, a);
+                        st->ajouterNote(s1, g1);
+                        st->ajouterNote(s2, g2);
+                        st->ajouterNote(s3, g3);
+                        e.ajouterUser(st);
+                        cout << "Student added.\n";
+                    }
+                    if (sub == "D") {
+                        string dm; cout << "Matricule: "; cin >> dm;
+                        e.supprimerUser(dm);
+                    }
+                }
+                if (c == "2") {
+                    cout << "\n--- TEACHERS ---\n";
+                    vector<Professeur*> profs = e.getProfesseurs();
+                    for (size_t i = 0; i < profs.size(); i++) profs[i]->afficherAdmin();
+                    cout << "A: Add teacher | D: Delete teacher" << endl;
+                    string sub; cin >> sub;
+                    if (sub == "A") {
+                        string n, p, m, subj;
+                        cout << "Nom: "; cin >> n;
+                        cout << "Prenom: "; cin >> p;
+                        cout << "Matricule: "; cin >> m;
+                        cout << "Subject: "; cin >> subj;
+                        Professeur* pr = new Professeur(n, p, m);
+                        pr->ajouterMatiere(subj);
+                        e.ajouterUser(pr);
+                        cout << "Teacher added.\n";
+                    }
+                    if (sub == "D") {
+                        string dm; cout << "Matricule: "; cin >> dm;
+                        e.supprimerUser(dm);
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
