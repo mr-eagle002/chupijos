@@ -1,0 +1,18 @@
+ if (c == "2") {
+                    cout << "\n=============TEACHERS=============\n";
+                    cout << "+-------------------------------------+" << endl;
+                    cout << "| # | Nom        | Matricule | Subject |" << endl;
+                    cout << "+-------------------------------------+" << endl;
+                    vector<Professeur*> profs = e.getProfesseurs();
+                    for (size_t i = 0; i < profs.size(); i++) {
+                        Professeur* p = profs[i];
+                        string nomprenom = p->getNom() + " " + p->getPrenom().substr(0,1) + ".";
+                        string mat = p->getMatricule();
+                        vector<string> matieres = p->getMatieres();
+                        string subj = matieres.empty() ? "" : matieres[0];
+                        cout << "| " << (i+1) << " | " << nomprenom;
+                        cout << string(max(0, 10 - (int)nomprenom.length()), ' ') << " | " << mat;
+                        cout << string(max(0, 9 - (int)mat.length()), ' ') << " | " << subj;
+                        cout << string(max(0, 7 - (int)subj.length()), ' ') << " |" << endl;
+                    }
+                    cout << "+-------------------------------------+" << endl;
